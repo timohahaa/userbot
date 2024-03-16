@@ -1,0 +1,13 @@
+server:
+  port: "8080"
+
+database:
+  maxConnPoolSize: 5
+
+telegram:
+  API_ID: 28083130
+  API_HASH: "815b73e4ce431a46e405f9f5f730640f"
+  bot:
+    commentFrequency: 1000
+
+

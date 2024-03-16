@@ -32,31 +32,46 @@ func main() {
 			DisableCopyright: false,
 		},
 	)
-
 	if err != nil {
 		log.Fatalln("failed to start client:", err)
 	}
 
+	// НАХОДИМ КАНАЛ ПО ИМЕНИ
 	resolvedPeer, err := client.API().ContactsResolveUsername(context.Background(), "Reaperhome")
 	if err != nil {
 		log.Fatalln("failed to resolve peer:", err)
 	}
 	channel := resolvedPeer.Chats[0].(*tg.Channel)
 
+	// ПОЛУЧАЕМ ИНФО О КАНАЛЕ (ДЛЯ РЕАКЦИЙ)
+	chat, err := client.API().ChannelsGetFullChannel(context.Background(), channel.AsInput())
+	if err != nil {
+		log.Fatalln("failed to get full channel:", err)
+	}
+	reactions := chat.FullChat.(*tg.ChannelFull).AvailableReactions.(*tg.ChatReactionsSome)
+
+	// ПОЛУЧАЕМ ПОСЛЕДНИЙ ПОСТ
 	msgs, err := client.API().MessagesGetHistory(context.Background(), &tg.MessagesGetHistoryRequest{
 		Peer:  channel.AsInputPeer(),
-		Limit: 5,
+		Limit: 1,
 	})
-
 	if err != nil {
 		log.Fatalln("failed to send message:", err)
 	}
 
 	chanMessages := msgs.(*tg.MessagesChannelMessages)
 	for _, msg := range chanMessages.Messages {
-		fmt.Println("=========================================================================")
-		fmt.Println("=========================================================================")
-		fmt.Println(msg.String())
+		fmt.Println(msg.GetID())
+	}
+
+	// СТАВИМ РЕАКЦИЮ
+	_, err = client.API().MessagesSendReaction(context.Background(), &tg.MessagesSendReactionRequest{
+		Peer:     channel.AsInputPeer(),
+		MsgID:    111,
+		Reaction: []tg.ReactionClass{reactions.Reactions[2]},
+	})
+	if err != nil {
+		log.Fatalln("failed to send reaction:", err)
 	}
 
 	client.Idle()
