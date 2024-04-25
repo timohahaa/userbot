@@ -6,11 +6,11 @@ import (
 	"github.com/timohahaa/userbot/internal/entity"
 )
 
-type AccountRepository interface {
+type TelegramRepository interface {
 	GetRandomAccount(ctx context.Context) (entity.Account, error)
-}
-
-type ChannelRepository interface {
+	SaveAccount(ctx context.Context, acc entity.Account) error
 	SaveChannel(ctx context.Context, channel entity.Channel) error
 	GetChannelByChannelId(ctx context.Context, id int64) (entity.Channel, error)
 }
+
+var _ TelegramRepository = &telegramRepo{}

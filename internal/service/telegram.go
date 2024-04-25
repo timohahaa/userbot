@@ -1,8 +1,9 @@
-package telegram
+package service
 
 import (
 	"context"
 	"errors"
+	"math/rand/v2"
 
 	"github.com/timohahaa/userbot/internal/entity"
 	"github.com/timohahaa/userbot/internal/repository"
@@ -10,6 +11,7 @@ import (
 	"github.com/celestix/gotgproto"
 	"github.com/celestix/gotgproto/sessionMaker"
 	"github.com/gotd/td/tg"
+	log "github.com/sirupsen/logrus"
 )
 
 type Client = gotgproto.Client
@@ -29,14 +31,12 @@ var PREDEFINED_REACTIONS = []tg.ReactionClass{
 type telegramService struct {
 	apiId            int
 	apiHash          string
-	accountRepo      repository.AccountRepository
-	channelRepo      repository.ChannelRepository
+	repo             repository.TelegramRepository
 	commentFrequency int
 }
 
 func NewTelegramService(
-	accRepo repository.AccountRepository,
-	chanRepo repository.ChannelRepository,
+	repo repository.TelegramRepository,
 	apiId int,
 	apiHash string,
 	commentFrequency int,
@@ -44,14 +44,13 @@ func NewTelegramService(
 	return &telegramService{
 		apiId:            apiId,
 		apiHash:          apiHash,
-		accountRepo:      accRepo,
-		channelRepo:      chanRepo,
+		repo:             repo,
 		commentFrequency: commentFrequency,
 	}
 }
 
 func (s *telegramService) GetRandomAccount(ctx context.Context) (entity.Account, error) {
-	account, err := s.accountRepo.GetRandomAccount(ctx)
+	account, err := s.repo.GetRandomAccount(ctx)
 
 	if err != nil {
 		return entity.Account{}, err
@@ -68,8 +67,9 @@ func (s *telegramService) SaveChannelByName(ctx context.Context, channelName str
 	if err != nil {
 		return err
 	}
+	defer client.Stop()
 
-	resolvedPeer, err := client.API().ContactsResolveUsername(context.Background(), channelName)
+	resolvedPeer, err := client.API().ContactsResolveUsername(ctx, channelName)
 	if err != nil {
 		return err
 	}
@@ -87,7 +87,7 @@ func (s *telegramService) SaveChannelByName(ctx context.Context, channelName str
 		Name:       channel.Username,
 	}
 
-	err = s.channelRepo.SaveChannel(ctx, chanEntity)
+	err = s.repo.SaveChannel(ctx, chanEntity)
 	if err != nil {
 		return ErrFailedToSaveChannel
 	}
@@ -96,7 +96,7 @@ func (s *telegramService) SaveChannelByName(ctx context.Context, channelName str
 }
 
 func (s *telegramService) getChannelByChannelId(ctx context.Context, id int64) (entity.Channel, error) {
-	channel, err := s.channelRepo.GetChannelByChannelId(ctx, id)
+	channel, err := s.repo.GetChannelByChannelId(ctx, id)
 	if err != nil {
 		return entity.Channel{}, err
 	}
@@ -130,7 +130,7 @@ func (s *telegramService) getRandomUserClient(ctx context.Context) (*gotgproto.C
 }
 
 func (s *telegramService) getAvailableReactions(ctx context.Context, client *Client, channel entity.Channel) ([]tg.ReactionClass, error) {
-	chat, err := client.API().ChannelsGetFullChannel(context.Background(), &tg.InputChannel{
+	chat, err := client.API().ChannelsGetFullChannel(ctx, &tg.InputChannel{
 		ChannelID:  channel.Id,
 		AccessHash: channel.AccessHash,
 	})
@@ -154,7 +154,7 @@ func (s *telegramService) getAvailableReactions(ctx context.Context, client *Cli
 }
 
 func (s *telegramService) getLastChannelPostId(ctx context.Context, client *Client, channel entity.Channel) (int, error) {
-	msgs, err := client.API().MessagesGetHistory(context.Background(), &tg.MessagesGetHistoryRequest{
+	msgs, err := client.API().MessagesGetHistory(ctx, &tg.MessagesGetHistoryRequest{
 		Peer: &tg.InputPeerChannel{
 			ChannelID:  channel.Id,
 			AccessHash: channel.AccessHash,
@@ -188,6 +188,9 @@ func (s *telegramService) ReactNewPost(ctx context.Context, channelId int64) err
 
 	// get available reactions (list of admin-set reactions or a list of default ones)
 	reactions, err := s.getAvailableReactions(ctx, client, channel)
+	if err != nil {
+		return err
+	}
 
 	// get last post id (the one to react to)
 	postId, err := s.getLastChannelPostId(ctx, client, channel)
@@ -195,8 +198,29 @@ func (s *telegramService) ReactNewPost(ctx context.Context, channelId int64) err
 		return err
 	}
 
-	for i := range reactionCount {
+	// stop the preparation client
+	client.Stop()
 
+	for _ = range reactionCount {
+		reactionIdx := rand.IntN(len(reactions))
+		randomUser, err := s.getRandomUserClient(ctx)
+		if err != nil {
+			log.Errorf("error getting random user client", err)
+			continue
+		}
+
+		_, err = randomUser.API().MessagesSendReaction(context.Background(), &tg.MessagesSendReactionRequest{
+			Peer: &tg.InputPeerChannel{
+				ChannelID:  channel.Id,
+				AccessHash: channel.AccessHash,
+			},
+			MsgID:    postId,
+			Reaction: []tg.ReactionClass{reactions[reactionIdx]},
+		})
+		if err != nil {
+			log.Errorf("error reacting to post", err)
+			continue
+		}
 	}
 
 	return nil
