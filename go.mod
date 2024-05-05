@@ -6,7 +6,7 @@ require (
 	github.com/celestix/gotgproto v1.0.0-beta17
 	github.com/go-playground/validator/v10 v10.20.0
 	github.com/golang-migrate/migrate/v4 v4.17.1
-	github.com/gotd/td v0.102.0
+	github.com/gotd/td v0.99.2
 	github.com/ilyakaznacheev/cleanenv v1.5.0
 	github.com/jackc/pgx/v5 v5.5.5
 	github.com/labstack/echo/v4 v4.12.0
