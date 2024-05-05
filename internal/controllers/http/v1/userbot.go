@@ -5,6 +5,20 @@ import (
 	"github.com/timohahaa/userbot/internal/service"
 )
 
-func newUserbotRoutes(g *echo.Group, telegramService service.TelegramService) {
+type userbotRoutes struct {
+	telegramService service.TelegramService
+}
 
+func newUserbotRoutes(g *echo.Group, telegramService service.TelegramService) {
+	_ = &userbotRoutes{
+		telegramService: telegramService,
+	}
+}
+
+
+
+
+func SaveChannelByName(c echo.Context) error {
+
+	return nil
 }
