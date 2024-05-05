@@ -95,11 +95,15 @@ func (s *telegramService) SaveChannelByName(ctx context.Context, channelName str
 	return nil
 }
 
-func (s *telegramService) getChannelByChannelId(ctx context.Context, id int64) (entity.Channel, error) {
+func (s *telegramService) GetChannelByChannelId(ctx context.Context, id int64) (entity.Channel, error) {
 	channel, err := s.repo.GetChannelByChannelId(ctx, id)
+	if errors.Is(err, repository.ErrChannelNotFound) {
+		return entity.Channel{}, ErrChannelNotFound
+	}
 	if err != nil {
 		return entity.Channel{}, err
 	}
+
 	return channel, nil
 }
 
@@ -178,9 +182,9 @@ func (s *telegramService) ReactNewPost(ctx context.Context, channelId int64) err
 	}
 
 	// get the channel first
-	channel, err := s.getChannelByChannelId(ctx, channelId)
+	channel, err := s.GetChannelByChannelId(ctx, channelId)
 	if err != nil {
-		return ErrChannelNotFound
+		return err
 	}
 
 	// calculate how many times to comment/react to a new post
@@ -224,4 +228,14 @@ func (s *telegramService) ReactNewPost(ctx context.Context, channelId int64) err
 	}
 
 	return nil
+}
+
+func (s *telegramService) ListChannels(ctx context.Context) ([]entity.Channel, error) {
+	channels, err := s.repo.ListChannels(ctx)
+	if err != nil {
+		log.Errorf("error listing channels", err)
+		return nil, err
+	}
+
+	return channels, nil
 }
