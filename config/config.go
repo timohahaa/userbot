@@ -9,13 +9,14 @@ import (
 type (
 	Config struct {
 		Server   `yaml:"server"`
-		DB       `yaml:"database"`
+		PG       `yaml:"postgres"`
 		Telegram `yaml:"telegram"`
 	}
 	Server struct {
-		Port string `yaml:"port" env:"HTTP_SERVER_PORT"`
+		Port    string `yaml:"port" env:"HTTP_SERVER_PORT"`
+		LogPath string `yaml:"logPath"`
 	}
-	DB struct {
+	PG struct {
 		URL          string `yaml:"url" env:"PG_URL" env-required:"true"`
 		ConnPoolSize int    `yaml:"maxConnPoolSize" env:"PG_MAX_POOL_SIZE"`
 	}
@@ -29,7 +30,7 @@ type (
 	}
 )
 
-func NewConfig(filePath string) (*Config, error) {
+func New(filePath string) (*Config, error) {
 	cfg := &Config{}
 
 	err := cleanenv.ReadConfig(filePath, cfg)

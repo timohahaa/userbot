@@ -1,7 +1,8 @@
 server:
   port: "8080"
+  logPath: "./logs/"
 
-database:
+postgres:
   maxConnPoolSize: 5
 
 telegram:
