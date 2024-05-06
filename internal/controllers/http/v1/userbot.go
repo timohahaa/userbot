@@ -58,7 +58,7 @@ func (r *userbotRoutes) GetChannel(c echo.Context) error {
 }
 
 type listChannelsOutput struct {
-	Data []getChannelOutput
+	Data []getChannelOutput `json:"data"`
 }
 
 // GET /api/v1/channel
