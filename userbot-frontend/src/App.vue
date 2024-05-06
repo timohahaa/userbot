@@ -1,7 +1,9 @@
 <script setup lang="ts">
-import HelloWorld from './components/HelloWorld.vue'
+import Logo from './components/Logo.vue';
+import Channels from './components/chats/Channels.vue';
 </script>
 
 <template>
-  <HelloWorld :num="78" />
+  <Logo/>
+  <Channels/>
 </template>
