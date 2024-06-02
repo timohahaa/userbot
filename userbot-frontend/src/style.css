@@ -3,49 +3,127 @@
 @tailwind components;
 @tailwind utilities;
 
-:root {
-  font-size: 20px;
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+* {
+	margin: 0;
+	padding: 0;
+	box-sizing: border-box;
+}
+body {
+	background: theme('colors.dark-main');
+	min-height: 100vh;
+	width: 100vw;
+	/* overflow: hidden; */
 }
 
-#app {
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
-  background-color: theme('colors.dark-main');
+/* ЛИНИИ НА ФОНЕ */
+
+.lines {
+	width: 110%;
+	position: absolute;
+	display: flex;
+	z-index: 0;
+	justify-content: space-between;
+}
+.lines span {
+	position: relative;
+	width: 5px;
+	height: calc(600px / (var(--i) / 10));
+	background: #2c6c7a;
+	border-radius: 50px;
+	animation: animate linear infinite;
+	animation-duration: calc(640s / var(--i));
+	animation-delay: -20s;
+}
+.lines span:nth-child(2n) {
+	background: #a41e4d;
+}
+.lines span:nth-child(3n) {
+	background: #56431c;
+}
+.lines span:nth-child(4n) {
+	background: rgb(29, 72, 73);
+}
+.lines span:nth-child(5n) {
+	background: #44346c;
+}
+
+@keyframes animate {
+	0% {
+		transform: translateY(calc(100vh + 100%));
+	}
+	100% {
+		transform: translateY(calc(-10vh - 100%));
+	}
+}
+
+/* СТИЛИ ДЛЯ ЧЕК БОКСА */
+
+.custom-checkbox { 
+	position: relative;
+	display: inline-block;
+	width: 20px;
+	height: 20px;
+	background-color: theme('colors.checkbox-color');
+	border-radius: 3px;
+	cursor: pointer;
+}
+
+.custom-checkbox input {
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+
+.custom-checkbox .checkmark {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 20px;
+	height: 20px;
+	background-image: url('@/assets/check-mark.png');
+	background-size: cover;
+	display: none;
+}
+
+.custom-checkbox input:checked + .checkmark {
+	display: block;
+}
+
+:root {
+	font-size: 20px;
+	font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+	line-height: 1.5;
+	font-weight: 400;
+
+	color-scheme: light dark;
+	background-color: #242424;
+
+	font-synthesis: none;
+	text-rendering: optimizeLegibility;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 }
 
 .btn {
-  border-radius: 8px;
-  border: 1px solid theme('colors.border');
-  padding: 0.6em 1.2em;
-  font-weight: 500;
-  font-family: inherit;
-  cursor: pointer;
-  transition: border-color 0.25s;
-  color: theme('colors.text');
+	border-radius: 8px;
+	border: 1px solid #fafafa;
+	padding: 0.6em 1.2em;
+	font-weight: 500;
+	font-family: inherit;
+	cursor: pointer;
+	transition: border-color 0.25s;
+	color: #fafafa;
 }
 .btn:hover {
-  box-shadow: inset 0em 0em 0em 10em rgba(255, 255, 255, 0.1);
+	box-shadow: inset 0em 0em 0em 10em rgba(255, 255, 255, 0.1);
 }
 
-
 @media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
-  }
-  a:hover {
-    color: #747bff;
-  }
+	:root {
+		/* color: #213547; */
+		background-color: #ffffff;
+	}
+	a:hover {
+		color: #747bff;
+	}
 }

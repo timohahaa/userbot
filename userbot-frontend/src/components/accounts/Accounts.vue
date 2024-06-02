@@ -2,18 +2,18 @@
 	<div class="bg-table-bg-color flex-col w-full h-full rounded-lg px-6 py-4">
 		<div class="flex justify-between items-center mb-[24px] h-[64px]">
 			<div class="flex flex-col h-full">
-				<h2 class="text-lg text-text-color mb-1">Channels</h2>
+				<h2 class="text-lg text-text-color mb-1">Accounts</h2>
 				<span class="text-gray-400 text-[12px]"
-					>More than 400+ new channels</span
+					>More than 400+ new accounts</span
 				>
 			</div>
 			<button
 				class="bg-button-color h-[46px] flex flex-row items-center font-medium rounded px-4"
 			>
 				<div class="h-[24px] w-[24px] mr-2">
-					<img :src="channel" class="max-h-[100%]" />
+					<img :src="account" class="max-h-[100%]" />
 				</div>
-				<span class="text-button-text-color text-xs">New Channel</span>
+				<span class="text-button-text-color text-xs">New Account</span>
 			</button>
 		</div>
 		<div class="w-full h-[calc(100%-64px-64px-24px-24px)] mb-[24px]">
@@ -31,12 +31,11 @@
 					</th>
 					<th class="font-medium pr-3 pb-4">NAME</th>
 					<th class="font-medium pr-3 pb-4">ID</th>
-					<th class="font-medium pr-3 pb-4">SUBSCRIBERS</th>
 					<th class="text-right font-medium pb-4">ACTION</th>
 				</tr>
 				<tr
-					v-if="chans.length != null"
-					v-for="chan in chans.slice(currentPage * 4, (currentPage + 1) * 4)"
+					v-if="accounts.length != null"
+					v-for="account in accounts.slice(currentPage * 4, (currentPage + 1) * 4)"
 					:class="trClasses"
 				>
 					<td class="w-[12px] pr-3">
@@ -49,12 +48,9 @@
 						</div>
 					</td>
 					<td class="pr-3 py-2 text-text-color">
-						{{ chan.name }}
+						{{ account.name }}
 					</td>
-					<td class="pr-3 py-2 text-text-color">{{ chan.id }}</td>
-					<td class="pr-3 py-2 text-gray-400">
-						{{ chan.userount }}
-					</td>
+					<td class="pr-3 py-2 text-text-color">{{ account.id }}</td>
 					<td class="flex justify-end items-center h-full">
 						<div class="mr-2">
 							<button
@@ -95,7 +91,7 @@
 				class="h-[16px] w-[16px]"
 				@click="
 					() => {
-						if (chans.length > (currentPage + 1) * 4) {
+						if (accounts.length > (currentPage + 1) * 4) {
 							currentPage++
 						}
 					}
@@ -109,47 +105,45 @@
 
 <script setup lang="ts">
 import { computed, onMounted, ref } from 'vue'
-import { Channel } from './channel'
+import { Account } from './account'
 import axios from 'axios'
 import config from '../../config.ts'
-import channel from '../../assets/add-channel.png' // не думаю, что так норм импортить изображения
+import account from '../../assets/add-account.png' // не думаю, что так норм импортить изображения
 import edit from '../../assets/edit.png'
 import trash from '../../assets/trash.png'
 import leftArrow from '../../assets/left-arrow.png'
 import rightArrow from '../../assets/right-arrow.png'
 
-let chans = ref<Array<Channel>>([])
+let accounts = ref<Array<Account>>([])
 let currentPage = ref(0)
 console.log(window)
 
-async function fetchChannels(): Promise<void> {
-	let resp = await axios.get(`${config.BASE_URL}/channel`)
-	for (let ch of resp.data.data) {
-		let chan = new Channel(ch.channel_id, ch.user_count, ch.channel_name)
-		chans.value?.push(chan)
+async function fetchAccounts(): Promise<void> {
+	// фиг знает написал в этой функции от себя, вообще хз, что здесь нужно
+	let resp = await axios.get(`${config.BASE_URL}/accountnel`)
+	for (let ac of resp.data.data) {
+		let account = new Account(ac.accountnel_id, ac.accountnel_name)
+		accounts.value?.push(account)
 	}
 }
 
 onMounted(() => {
-	const chs: Channel[] = [
-		new Channel(1, 521, 'GG WP'),
-		new Channel(2, 521, 'reaper'),
-		new Channel(3, 521, 'reaper'),
-		new Channel(4, 521, 'reaper'),
-		new Channel(5, 521, 'reaper'),
-		new Channel(6, 521, 'reaper'),
-		// new Channel(7, 521, 'reaper'),
-		// new Channel(8, 521, 'reaper'),
-		// new Channel(5, 521, 'reaper'),
+	const acs: Account[] = [
+		new Account(1, 'GG WP'),
+		new Account(2, 'reaper'),
+		new Account(3, 'reaper'),
+		new Account(4, 'reaper'),
+		new Account(5, 'reaper'),
+		new Account(6, 'reaper'),
 	]
-	// await fetchChannels()
-	chans.value?.push(...chs)
-	console.log(chans.value?.length)
+	// await fetchaccountnels()
+	accounts.value?.push(...acs)
+	console.log(accounts.value?.length)
 })
 
 const tableClasses = computed(() => {
 	// расчёт выделяемой
-	const length = chans.value?.slice(
+	const length = accounts.value?.slice(
 		currentPage.value * 4,
 		(currentPage.value + 1) * 4
 	).length
@@ -171,7 +165,7 @@ const tableClasses = computed(() => {
 })
 
 const trClasses = computed(() => {
-	const length = chans.value?.slice(
+	const length = accounts.value?.slice(
 		currentPage.value * 4,
 		(currentPage.value + 1) * 4
 	).length
